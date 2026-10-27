@@ -52,12 +52,24 @@ async def cmd_help(message: Message):
         f"/help - список команд"
     )
 
+@dp.message(Command("about"))
+async def cmd_about(message: Message):
+    await message.answer(
+        f"О боте\n\n"
+        f"Username: @GeeksRobot\n"
+        f"Name: VsCode - Тестирование проектов\n\n"
+        f"Бот создан для Группы 71-1, 3 месяц"
+    )
 
 @dp.message(F.text.lower() == "группа")
 async def cmd_group_f(message: Message):
     await message.answer(
         f"Твоя группа: 71-1"
     )
+
+@dp.message(F.text.lower() == "пока")
+async def cmd_bye(message: Message):
+    await message.answer("👋🏻")
 
 @dp.message()
 async def cmd_echo(message:Message):
