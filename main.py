@@ -32,50 +32,19 @@ from aiogram import F
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
+from aiogram.fsm.storage.memory import MemoryStorage
 
-BOT_TOKEN = "8699853215:AAGvrStTbE0qbOLThQYgCJzSnAX1jqbyU_o"
+from config import BOT_TOKEN
+from db.database import init_db
+from src.handlers import router as handlers_router
 
 bot = Bot(BOT_TOKEN)
-dp = Dispatcher() # обработчик входящих сообщений
+dp = Dispatcher(storage=MemoryStorage()) # обработчик входящих сообщений
 
-@dp.message(CommandStart())
-async def CommandStart(message: Message):
-    await message.answer(
-        f"Привет {message.from_user.full_name} (@{message.from_user.username}), я Бот!"
-    )
-    print(f"Пользователь {message.from_user.username} написал команду start")
-
-@dp.message(Command("help"))
-async def cmd_help(message: Message):
-    await message.answer(
-        f"/start - команда для запуска\n"
-        f"/help - список команд"
-    )
-
-@dp.message(Command("about"))
-async def cmd_about(message: Message):
-    await message.answer(
-        f"О боте\n\n"
-        f"Username: @GeeksRobot\n"
-        f"Name: VsCode - Тестирование проектов\n\n"
-        f"Бот создан для Группы 71-1, 3 месяц"
-    )
-
-@dp.message(F.text.lower() == "группа")
-async def cmd_group_f(message: Message):
-    await message.answer(
-        f"Твоя группа: 71-1"
-    )
-
-@dp.message(F.text.lower() == "пока")
-async def cmd_bye(message: Message):
-    await message.answer("👋🏻")
-
-@dp.message()
-async def cmd_echo(message:Message):
-    await message.answer(f"Ты написал: {message.text}")
 
 async def main():
+    init_db()
+    dp.include_router(handlers_router)
     await dp.start_polling(bot) # отправляет запросы на тг-сервер
 
 if __name__ == "__main__":
