@@ -7,8 +7,7 @@ from aiogram.types import Message, CallbackQuery
 from src.keyboards import *
 from src.state import *
 from src.questions import *
-from db.users import get_user, create_user
-
+from db.users import *
 from db.questions import get_all_questions
 from db.results import save_result
 
@@ -58,9 +57,17 @@ async def cmd_corzina_f(message: Message):
 async def cmd_bye(message: Message):
     await message.answer("👋🏻")
 
-# @router.message()
-# async def cmd_echo(message:Message):
-#     await message.answer(f"Ты написал: {message.text}")
+@router.message(F.text == "Профиль")
+async def cmd_profile(message: Message):
+    user_tg_id = message.from_user.id
+    user = get_user(user_tg_id)
+    user_db_id = user['id']
+    user_db_tg_username = user['username']
+    await message.answer(f"Ваш профиль:\n\n"
+                         f"Ваш айди в БД: {user_db_id}\n"
+                         f"Ваш айди телеграм: {user_tg_id}\n\n"
+                         f"Ваш юзернейм в телеграм: @{message.from_user.username}\n"
+                         f"Ваш юзернейм в БД: @{user_db_tg_username}", reply_markup=profile_inline_buttons)
 
 @router.message(F.text == "Начать Викторину")
 async def start_message_quiz(message: Message, state: FSMContext):
@@ -82,8 +89,23 @@ async def start_message_quiz(message: Message, state: FSMContext):
 async def callback_main_menu(callback: CallbackQuery):
     await callback.answer("Вы в главном меню")
     await callback.message.answer(
-            f"Привет {callback.message.from_user.full_name} (@{callback.message.from_user.username}), Ты в главном меню!", reply_markup=reply_buttons
+            f"Привет {callback.from_user.full_name} (@{callback.from_user.username}), Ты в главном меню!", reply_markup=reply_buttons
         )
+
+@router.callback_query(F.data == "delete_user")
+async def callback_delete_user(callback: CallbackQuery):
+    await callback.answer()
+    tg_id = callback.from_user.id
+    delete_user(tg_id)
+    await callback.message.answer("Ваша запись в бд - удалена. Чтобы начать пользоваться ботом, пропишите /start")
+
+@router.callback_query(F.data == "change_username")
+async def callback_change_username(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    tg_id = callback.from_user.id
+    await callback.message.answer("Введите новый юзернейм для бд")
+    await state.set_state(User.waiting_username)
+    
 
 @router.callback_query(F.data == "quiz_start")
 async def callback_quiz_start(callback: CallbackQuery, state: FSMContext):
@@ -144,3 +166,12 @@ async def quiz_message(message: Message, state: FSMContext):
     else:
         await state.update_data(index=index, score=score)
         await message.answer(f"Вопрос {index+1}: {questions[index]['question_text']}") 
+
+
+@router.message(User.waiting_username)
+async def state_new_username(message: Message, state: FSMContext):
+    tg_id = message.from_user.id
+    text = message.text
+    update_username(username=text, telegram_id=tg_id)
+    await message.answer(f"Ваш юзернейм в базе данных изменено на @{text}")
+    await state.clear()

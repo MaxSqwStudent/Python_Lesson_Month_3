@@ -27,3 +27,10 @@ new_quiz_game = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Главное меню", callback_data="main_menu")]
     ]
 )
+
+profile_inline_buttons = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Изменить юзернейм в бд", callback_data="change_username")],
+        [InlineKeyboardButton(text="Удалить аккаунт в бд", callback_data="delete_user")]
+    ]
+)

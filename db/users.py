@@ -1,7 +1,7 @@
 import sqlite3
 
 from db.database import get_db
-from db.queries import GET_USER_BY_TG_ID, INSERT_USER
+from db.queries import GET_USER_BY_TG_ID, INSERT_USER, DELETE_USER, UPDATE_USER_USERNAME
 
 def get_user(telegram_id: int):
     conn = get_db()
@@ -16,4 +16,18 @@ def create_user(telegram_id: int, username: str):
     conn.commit()
     conn.close()
     return get_user(telegram_id)
+
+def update_username(username: str, telegram_id: int):
+    conn = get_db()
+    conn.execute(UPDATE_USER_USERNAME, (username, telegram_id))
+    conn.commit()
+    conn.close()
+    return get_user(telegram_id)
+
+def delete_user(telegram_id: int):
+    conn = get_db()
+    conn.execute(DELETE_USER, (telegram_id,))
+    conn.commit()
+    conn.close()
+    
 
