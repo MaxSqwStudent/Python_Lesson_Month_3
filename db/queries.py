@@ -48,3 +48,28 @@ INSERT_USER = '''
 UPDATE_USER_USERNAME = ''
 
 DELETE_USER = ''
+
+
+
+GET_ALL_QUESTIONS = 'SELECT * FROM questions'
+
+GET_QUESTION_BY_ID = 'SELECT * FROM questions WHERE id = ?'
+
+# Homework
+
+INSERT_QUESTION = '''
+    INSERT INTO questions (question_text, correct_answer)
+    VALUES (?, ?)    
+'''
+
+# ==RESULTS==
+
+INSERT_RESULT = '''
+    INSERT INTO results (user_id, question_id, is_correct)
+    VALUES (?, ?, ?)
+'''
+
+GET_SCORE_BY_USER_ID = '''
+    SELECT COUNT(*) as total, SUM(is_correct) as correct FROM results WHERE user_id = ?
+'''
+
